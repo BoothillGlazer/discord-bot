@@ -27,10 +27,17 @@ async def on_message(message):
     # Sprawdź, czy wiadomość została wysłana na kanale scenarios
     if message.channel.id == SCENARIOS_CHANNEL_ID:
         try:
-            await message.create_thread(
-                name=f"Scenariusz - {message.author.display_name}",
-                auto_archive_duration=60
-            )
+            thread_name = message.content.strip()
+
+        if not thread_name:
+            thread_name = f"Scenariusz od {message.author.display_name}"
+        
+        thread_name = thread_name[:100]
+        
+        await message.create_thread(
+            name=thread_name,
+            auto_archive_duration=60
+        )
         except discord.Forbidden:
             print("❌ Bot nie ma uprawnień do tworzenia wątków.")
         except discord.HTTPException as e:

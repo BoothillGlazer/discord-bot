@@ -1,10 +1,10 @@
+import os
 import discord
 from discord.ext import commands
-import os
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-SCENARIOS_CHANNEL_ID = 1527980515712434246  # <-- Wklej tutaj ID kanału "scenarios"
+SCENARIOS_CHANNEL_ID = 1527980515712434246
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -14,34 +14,40 @@ bot = commands.Bot(
     intents=intents
 )
 
+
 @bot.event
 async def on_ready():
-    print(f"Zalogowano jako {bot.user.name}")
+    print(f"✅ Zalogowano jako {bot.user.name}")
+
 
 @bot.event
 async def on_message(message):
-    # Ignoruj wiadomości botów
+    # Ignoruj wiadomości wysłane przez boty
     if message.author.bot:
         return
 
-    # Sprawdź, czy wiadomość została wysłana na kanale scenarios
+    # Twórz wątki tylko na kanale scenarios
     if message.channel.id == SCENARIOS_CHANNEL_ID:
         try:
             thread_name = message.content.strip()
 
-        if not thread_name:
-            thread_name = f"Scenariusz od {message.author.display_name}"
-        
-        thread_name = thread_name[:100]
-        
-        await message.create_thread(
-            name=thread_name,
-            auto_archive_duration=60
-        )
+            # Jeśli wiadomość jest pusta (np. tylko obrazek)
+            if not thread_name:
+                thread_name = f"Scenariusz od {message.author.display_name}"
+
+            # Discord pozwala maksymalnie na 100 znaków
+            thread_name = thread_name[:100]
+
+            await message.create_thread(
+                name=thread_name,
+                auto_archive_duration=60
+            )
+
         except discord.Forbidden:
             print("❌ Bot nie ma uprawnień do tworzenia wątków.")
+
         except discord.HTTPException as e:
-            print(f"❌ Wystąpił błąd podczas tworzenia wątku: {e}")
+            print(f"❌ Nie udało się utworzyć wątku: {e}")
 
     # Pozwala działać komendom
     await bot.process_commands(message)
